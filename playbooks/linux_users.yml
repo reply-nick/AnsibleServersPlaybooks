@@ -1,0 +1,43 @@
+---
+ - hosts: proxmox-martin
+   gather_facts: yes
+   become: true
+   become_method: su
+   become_user: root
+   tasks:
+   - name: Create users and groups
+     block:
+       - name: Create nicolae group
+         group:
+              name: nicolae
+              state: present
+       - name: Create ansible group
+         group:
+              name: ansible
+              state: present
+       - name: Create nicolae user
+         user:
+              name: nicolae
+              shell: /bin/bash
+              groups: nicolae,adm,cdrom,sudo,dip,plugdev
+       - name: Add nicolae user to the sudoers
+         copy:
+              dest: "/etc/sudoers.d/nicolae"
+              content: "nicolae  ALL=(ALL)  NOPASSWD: ALL"
+       - name: Deploy SSH Key to nicolae user
+         authorized_key: user=nicolae
+                         key="{{ lookup('file', '/home/nicolae/.ssh/id_rsa.pub') }}"
+                         state=present
+       - name: Create ansible user
+         user:
+              name: ansible
+              shell: /bin/bash
+              groups: ansible,adm,cdrom,sudo,dip,plugdev
+       - name: Add ansible user to the sudoers
+         copy:
+              dest: "/etc/sudoers.d/ansible"
+              content: "ansible  ALL=(ALL)  NOPASSWD: ALL"
+       - name: Deploy SSH Key to ansible user
+         authorized_key: user=ansible
+                         key="{{ lookup('file', '/home/nicolae/.ssh/id_rsa.pub') }}"
+                         state=present

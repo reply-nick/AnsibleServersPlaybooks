@@ -1,0 +1,5 @@
+inventory/
+cp/
+tmp/
+playbooks/bootstrap/
+.gitattributes
